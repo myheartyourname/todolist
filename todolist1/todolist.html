@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="js/vue.js"></script>
+    <style>
+        *{
+            padding:0;
+            margin:0;
+            list-style:none;
+            box-sizing: border-box;
+        }
+        body,html{
+            width:100%;
+            height:100%;
+            background:#CDCDCD;
+        }
+        header{
+            width:100%;
+            height:52px;
+            background:#323232;
+            line-height:52px;
+            color:#DDDDDD;
+            display:flex;
+            align-items: center;
+        }
+        header>h2{
+            margin-left:383px;
+        }
+        header>input{
+            width:361px;
+            height:27px;
+            margin-left:146px;
+            padding-left:8px;
+            font-size: 14px;
+            color:#757575;
+            line-height:27px;
+            border:none;
+            outline:none;
+            border-radius:5px;
+            box-shadow:1px 1px 6px 0.8px #b0b0b0 inset;
+        }
+        section{
+            width:616px;
+            height:auto;
+            margin:0 auto;
+        }
+        section>h2{
+            width:100%;
+            height:72px;
+            color:#000;
+            line-height: 72px;
+            display:flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        section>h2>span{
+            display: block;
+            width: 20px;
+            height: 20px;
+            background:#E6E6FA;
+            border-radius: 50%;
+            font-size: 14px;
+            color: #666666;
+            text-align: center;
+            line-height: 20px;
+        }
+        section>ul,ol{
+            width:100%;
+            height:auto;
+        }
+        ul>li,ol>li{
+            width:100%;
+            height:32px;
+            background:#fff;
+            border-radius: 4px;
+            border-left:5px solid #629A9C;
+            margin-bottom:10px;
+            display:flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        ol>li{
+            background:#E6E6E6;
+            border-left:5px solid #B3B3B3;
+        }
+        ul>li>.inp1,ol>li>.inp1{
+            width:21px;
+            height:21px;
+            border:1px solid #ADADAD;
+            margin-left:10px;
+        }
+        ul>li>.inp2,ol>li>.inp2{
+            width:450px;
+            height:26px;
+            font-size:16px;
+            color:#000;
+            line-height:26px;
+            border:none;
+            outline:none;
+        }
+        ol>li>.inp2{
+            background:#E6E6E6;
+            color:#676767;
+        }
+        ul>li>button,ol>li>button{
+            width:22px;
+            height:20px;
+            background:url('img/btn.png') no-repeat center / cover;
+            border:none;
+            border-radius:50%;
+            margin-right:10px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <header>
+        <h2>ToDoList</h2>
+        <input type="text" @keydown.enter="add" v-model="msg" placeholder="ToDoList">
+    </header>
+    <section>
+        <h2>正在进行 <span>{{filter.doing.length}}</span></h2>
+        <ul>
+            <li v-for="v in filter.doing">
+                <input type="checkbox" v-model="v.status" class="inp1">
+                <input type="text" v-model="v.content" class="inp2">
+                <button @click="del(v.id)"></button>
+            </li>
+        </ul>
+        <h2>已经完成 <span>{{filter.done.length}}</span></h2>
+        <ol>
+            <li v-for="v in filter.done">
+                <input type="checkbox" v-model="v.status" class="inp1">
+                <input type="text" v-model="v.content" class="inp2">
+                <button @click="del(v.id)"></button>
+            </li>
+        </ol>
+    </section>
+</div>
+<script>
+//    let arr=[
+//        {id:1,content:'清澈的河水',status:true},
+//        {id:2,content:'蔚蓝的天空',status:false},
+//        {id:3,content:'巍峨的大山',status:true},
+//        {id:4,content:'辽阔的草原',status:false}
+//    ]
+//    localStorage.todos=JSON.stringify(arr);  //数据存到本地的todos
+    let app=new Vue({
+        el:'#app',
+        data:{
+            todos:[],
+            lastid:0,
+            msg:''
+        },
+        methods:{
+            save(){
+                localStorage.todos=JSON.stringify(this.todos)
+            },
+            del(ids){
+                this.todos=this.todos.filter(element=>element.id!=ids)
+            },
+            add(){
+                this.todos.push({id:++this.lastid,content:this.msg,status:false});
+                this.msg='';
+            }
+        },
+        computed:{
+            filter(){  //对数据进行筛选
+                let data={doing:[],done:[]};
+                data.done=this.todos.filter(ele=>ele.status);
+                data.doing=this.todos.filter(ele=>!ele.status);
+                return data;
+            }
+        },
+        mounted(){  //渲染后拿回数据
+            this.todos=JSON.parse(localStorage.todos);
+            this.lastid=this.todos[this.todos.length-1].id;
+        }
+    })
+
+    //使用 watch 选项允许我们执行异步操作 (访问一个 API)
+    app.$watch('todos',function(v,oldv){
+        localStorage.todos=JSON.stringify(this.todos)
+    },{deep:true})  //深度侦听
+</script>
+</body>
+</html>
